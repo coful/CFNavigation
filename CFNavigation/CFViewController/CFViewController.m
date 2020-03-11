@@ -45,10 +45,14 @@
         //|| [viewControllerToPresent isKindOfClass:[CFNavigationController class]]
         
         viewControllerToPresent.transitioningDelegate = self;
+        viewControllerToPresent.modalPresentationStyle = UIModalPresentationFullScreen;
+        UIPanGestureRecognizer *rightPan = [[UIPanGestureRecognizer alloc]initWithTarget:self
+        action:@selector(handleRightPanGesture:)];
+         [viewControllerToPresent.view addGestureRecognizer:rightPan];
         
-        UIScreenEdgePanGestureRecognizer *edgePan = [[UIScreenEdgePanGestureRecognizer alloc] initWithTarget:self action:@selector(handleEdgePanGesture:)];
-        edgePan.edges = UIRectEdgeLeft;
-        [viewControllerToPresent.view addGestureRecognizer:edgePan];
+//        UIScreenEdgePanGestureRecognizer *edgePan = [[UIScreenEdgePanGestureRecognizer alloc] initWithTarget:self action:@selector(handleEdgePanGesture:)];
+//        edgePan.edges = UIRectEdgeLeft;
+//        [viewControllerToPresent.view addGestureRecognizer:edgePan];
         
     }
     

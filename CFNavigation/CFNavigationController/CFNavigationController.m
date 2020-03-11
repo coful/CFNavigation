@@ -22,7 +22,7 @@
     UIImageView *lastScreenShotView;
     
     UIView *shadow;
-
+    
 }
 
 @property (nonatomic,retain) UIView *backgroundView;
@@ -37,38 +37,41 @@
 
 @implementation CFNavigationController
 
-- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
-{
-    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
-    if (self) {
-        
-        self.screenShotsList = [[NSMutableArray alloc]initWithCapacity:2];
-        self.canDragBack = YES;
-        
-    }
-    return self;
-}
+//- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
+//{
+//    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+//    if (self) {
+//        self.canDragBack = YES;
+//    }
+//    return self;
+//}
 
 - (void)viewDidLoad {
     [super viewDidLoad];
     
     self.delegate=self;
+    self.canDragBack = YES;
+    self.screenShotsList = [[NSMutableArray alloc] initWithCapacity:2];
     
-    [self addPanGestureRecognizer:self.view];
-    
-    //使原来UINavigationController边缘滑动手势返回不可用
-    self.interactivePopGestureRecognizer.enabled = NO;
+    if (@available(iOS 13.0, *)) {
+        self.interactivePopGestureRecognizer.enabled = YES;
+    }else{
+        [self addPanGestureRecognizer:self.view];
+        //使原来UINavigationController边缘滑动手势返回不可用
+        self.interactivePopGestureRecognizer.enabled = NO;
+    }
 }
 
 
 -(void)addPanGestureRecognizer:(UIView *) view{
-    //    UIPanGestureRecognizer *recognizer = [[UIPanGestureRecognizer alloc]initWithTarget:self
-    //                                                                                action:@selector(handleRightPanGesture:)];
-    //    recognizer.delegate = self;
+    UIPanGestureRecognizer *recognizer = [[UIPanGestureRecognizer alloc]initWithTarget:self
+                                                                                action:@selector(handleRightPanGesture:)];
     
-    UIScreenEdgePanGestureRecognizer *recognizer = [[UIScreenEdgePanGestureRecognizer alloc] initWithTarget:self action:@selector(handleEdgePanGesture:)];
-    recognizer.edges = UIRectEdgeLeft;
+    //        UIScreenEdgePanGestureRecognizer *recognizer = [[UIScreenEdgePanGestureRecognizer alloc] initWithTarget:self action:@selector(handleEdgePanGesture:)];
+    //        recognizer.edges = UIRectEdgeLeft;
     
+    recognizer.delegate = self;
+    //    NSLog(@"addPanGestureRecognizer %@",view);
     [recognizer delaysTouchesBegan];
     [view addGestureRecognizer:recognizer];
 }
@@ -114,7 +117,13 @@
     
     //    NSLog(@"push screenShotsList: %lu",(unsigned long)self.screenShotsList.count);
     
+    if (@available(iOS 13.0, *)) {
+        //添加手势
+        [self addPanGestureRecognizer:viewController.view];
+    }
+    
     [super pushViewController:viewController animated:animated];
+    
 }
 
 // override the pop method
@@ -133,9 +142,9 @@
 {
     UIGraphicsBeginImageContextWithOptions(TOP_VIEW.bounds.size, TOP_VIEW.opaque, 0.0);
     [TOP_VIEW.layer renderInContext:UIGraphicsGetCurrentContext()];
-    
-    UIImage * img = UIGraphicsGetImageFromCurrentImageContext();
-    
+    //    NSLog(@"capture w: %f",TOP_VIEW.bounds.size.width);
+    UIImage *img = UIGraphicsGetImageFromCurrentImageContext();
+    //    NSLog(@"img : %@",img);
     UIGraphicsEndImageContext();
     
     return img;
@@ -178,6 +187,9 @@
     
     CGFloat progress = ABS([sender translationInView:KEY_WINDOW].x)/KEY_WINDOW.bounds.size.width;
     //    CGPoint touchPoint = [sender locationInView:KEY_WINDOW];
+//    NSLog(@"handleEdgePanGesture");
+    
+//    NSLog(@"%f", progress);
     
     if (self.viewControllers.count <= 1 || !self.canDragBack) return;
     
@@ -274,13 +286,15 @@
 
 - (void)handleRightPanGesture:(UIPanGestureRecognizer *)recoginzer
 {
-    //    NSLog(@"CFNavigationController");
+//    NSLog(@"handleRightPanGesture");
     
     // If the viewControllers has only one vc or disable the interaction, then return.
     if (self.viewControllers.count <= 1 || !self.canDragBack) return;
     
     // we get the touch position by the window's coordinate
     CGPoint touchPoint = [recoginzer locationInView:KEY_WINDOW];
+    
+//    NSLog(@"%f", touchPoint.x);
     
     // begin paning, show the backgroundView(last screenshot),if not exist, create it.
     if (recoginzer.state == UIGestureRecognizerStateBegan) {
@@ -396,7 +410,7 @@
     
     //    NSLog(@"viewControllers---%lu",(unsigned long)self.viewControllers.count);
     //    NSLog(@"gestureRecognizers---%lu",self.view.gestureRecognizers.count);
-
+    
 }
 
 @end

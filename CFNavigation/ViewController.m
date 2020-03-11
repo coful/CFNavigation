@@ -39,6 +39,7 @@
 
 - (void)presentBtnClick {
     NextViewController *vc = [[NextViewController alloc] init];
+    vc.modalPresentationStyle = UIModalPresentationFullScreen;
     [self presentViewController:vc animated:YES completion:nil];
 }
 
